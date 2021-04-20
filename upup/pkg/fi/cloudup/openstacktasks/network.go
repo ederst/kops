@@ -23,6 +23,7 @@ import (
 	"k8s.io/klog/v2"
 	"k8s.io/kops/upup/pkg/fi"
 	"k8s.io/kops/upup/pkg/fi/cloudup/openstack"
+	"k8s.io/kops/upup/pkg/fi/cloudup/terraform"
 )
 
 // +kops:fitask
@@ -146,4 +147,34 @@ func (_ *Network) RenderOpenstack(t *openstack.OpenstackAPITarget, a, e, changes
 	e.ID = a.ID
 	klog.V(2).Infof("Using an existing Openstack network, id=%s", fi.StringValue(e.ID))
 	return nil
+}
+
+type terraformNetwork struct {
+	Name *string `json:"name,omitempty" cty:"name"`
+	// LaunchConfigurationName *terraform.Literal                               `json:"launch_configuration,omitempty" cty:"launch_configuration"`
+	// LaunchTemplate          *terraformAutoscalingLaunchTemplateSpecification `json:"launch_template,omitempty" cty:"launch_template"`
+	// MaxSize                 *int64                                           `json:"max_size,omitempty" cty:"max_size"`
+	// MinSize                 *int64                                           `json:"min_size,omitempty" cty:"min_size"`
+	// MixedInstancesPolicy    []*terraformMixedInstancesPolicy                 `json:"mixed_instances_policy,omitempty" cty:"mixed_instances_policy"`
+	// VPCZoneIdentifier       []*terraform.Literal                             `json:"vpc_zone_identifier,omitempty" cty:"vpc_zone_identifier"`
+	// Tags                    []*terraformASGTag                               `json:"tag,omitempty" cty:"tag"`
+	// MetricsGranularity      *string                                          `json:"metrics_granularity,omitempty" cty:"metrics_granularity"`
+	// EnabledMetrics          []*string                                        `json:"enabled_metrics,omitempty" cty:"enabled_metrics"`
+	// SuspendedProcesses      []*string                                        `json:"suspended_processes,omitempty" cty:"suspended_processes"`
+	// InstanceProtection      *bool                                            `json:"protect_from_scale_in,omitempty" cty:"protect_from_scale_in"`
+	// LoadBalancers           []*terraform.Literal                             `json:"load_balancers,omitempty" cty:"load_balancers"`
+	// TargetGroupARNs         []*terraform.Literal                             `json:"target_group_arns,omitempty" cty:"target_group_arns"`
+}
+
+func (_ *Network) RenderTerraform(t *terraform.TerraformTarget, a, e, changes *Network) error {
+	tf := &terraformNetwork{
+		Name: e.Name,
+	}
+
+	return t.RenderResource("openstack_networking_network_v2", *e.Name, tf)
+}
+
+// TerraformLink fills in the property
+func (e *Network) TerraformLink() *terraform.Literal {
+	return terraform.LiteralProperty("openstack_networking_network_v2", fi.StringValue(e.Name), "id")
 }

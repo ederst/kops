@@ -19,8 +19,13 @@ package openstacktasks
 import (
 	"io/ioutil"
 	"os"
+	"path"
+	"reflect"
 	"testing"
 
+
+	"k8s.io/kops/pkg/diff"
+	"k8s.io/kops/upup/pkg/fi"
 	"k8s.io/kops/upup/pkg/fi/cloudup/openstack"
 	"k8s.io/kops/upup/pkg/fi/cloudup/terraform"
 )
@@ -58,8 +63,44 @@ func doRenderTests(t *testing.T, method string, cases []*renderTest) {
 			t.FailNow()
 		}
 
-		t.Logf("do something with %s and %s", filename, target)
+		// @step: build the inputs for the methods - hopefully these don't change between them
+		var inputs []reflect.Value
+		for _, x := range []interface{}{target, c.Resource, c.Resource, c.Resource} {
+			inputs = append(inputs, reflect.ValueOf(x))
+		}
 
-		t.Logf("case %d, expected: %s", i, c.Expected)
+		err := func() error {
+			// @step: invoke the rendering method of the target
+			resp := reflect.ValueOf(c.Resource).MethodByName(method).Call(inputs)
+			if err := resp[0].Interface(); err != nil {
+				return err.(error)
+			}
+
+			// @step: invoke the target finish up
+			in := []reflect.Value{reflect.ValueOf(make(map[string]fi.Task))}
+			resp = reflect.ValueOf(target).MethodByName("Finish").Call(in)
+			if err := resp[0].Interface(); err != nil {
+				return err.(error)
+			}
+
+			// @step: check the render is as expected
+			if c.Expected != "" {
+				content, err := ioutil.ReadFile(path.Join(outdir, filename))
+				if err != nil {
+					return err
+				}
+				if c.Expected != string(content) {
+					diffString := diff.FormatDiff(c.Expected, string(content))
+					t.Logf("diff:\n%s\n", diffString)
+					t.Errorf("case %d, expected: %s\n,got: %s\n", i, c.Expected, string(content))
+					//assert.Equal(t, "", string(content))
+				}
+			}
+
+			return nil
+		}()
+		if err != nil {
+			t.Errorf("case %d, did not expect an error: %s", i, err)
+		}
 	}
 }

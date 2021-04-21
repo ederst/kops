@@ -29,13 +29,19 @@ func TestNetworkTerraformRender(t *testing.T) {
 				Name: fi.String("test"),
 			},
 			Expected: `provider "openstack" {
-				region = "nova"
-			}
+  region = "nova"
+}
 
-			resource "openstack_networking_network_v2" "test" {
-				name = "test"
-			}
-			`,
+resource "openstack_networking_network_v2" "test" {
+  name = "test"
+}
+
+terraform {
+  required_version = ">= 0.12.26"
+  required_providers {
+  }
+}
+`,
 		},
 	}
 

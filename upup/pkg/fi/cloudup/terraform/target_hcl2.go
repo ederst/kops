@@ -115,6 +115,11 @@ func (t *TerraformTarget) finishHCL2(taskMap map[string]fi.Task) error {
 				"version": cty.StringVal(">= 1.33.0"),
 			})
 		}
+	} else if t.Cloud.ProviderID() == kops.CloudProviderOpenstack {
+		writeMap(requiredProvidersBody, "openstack", map[string]cty.Value{
+			"source":  cty.StringVal("terraform-provider-openstack/openstack"),
+			"version": cty.StringVal(">= 1.40.0"),
+		})
 	}
 
 	bytes := hclwrite.Format(f.Bytes())

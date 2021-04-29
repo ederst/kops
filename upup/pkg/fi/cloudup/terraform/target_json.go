@@ -97,6 +97,14 @@ func (t *TerraformTarget) finishJSON(taskMap map[string]fi.Task) error {
 			requiredProviderAWS[k] = v
 		}
 		requiredProvidersByName["aws"] = requiredProviderAWS
+	} else if t.Cloud.ProviderID() == kops.CloudProviderOpenstack {
+		requiredProviderOpenStack := make(map[string]interface{})
+		requiredProviderOpenStack["source"] = "terraform-provider-openstack/openstack"
+		requiredProviderOpenStack["version"] = ">= 1.40.0"
+		for k, v := range tfGetProviderExtraConfig(t.clusterSpecTarget) {
+			requiredProviderOpenStack[k] = v
+		}
+		requiredProvidersByName["openstack"] = requiredProviderOpenStack
 	}
 
 	if len(requiredProvidersByName) != 0 {

@@ -21,8 +21,7 @@ import (
 	"testing"
 
 	kopsapi "k8s.io/kops/pkg/apis/kops"
-	// "k8s.io/kops/upup/pkg/fi"
-	// "k8s.io/kops/pkg/apis/kops/util"
+	"k8s.io/kops/upup/pkg/fi"
 	"k8s.io/kops/pkg/assets"
 )
 
@@ -31,125 +30,62 @@ func buildKubeDNSCluster() *kopsapi.Cluster {
 		Spec: kopsapi.ClusterSpec{
 			CloudProvider:     "aws",
 			KubernetesVersion: "1.20.5",
-			// NonMasqueradeCIDR: "100.64.0.0/10",
 			ServiceClusterIPRange: "10.135.128.0/17",
-			// ServiceClusterIPRange: &kopsapi.ServiceClusterIPRangeSpec{},
-			// Networking: &kopsapi.NetworkingSpec{
-			// 	Kubenet: &kopsapi.KubenetNetworkingSpec{},
-			// },
-			// KubeDNS: &kopsapi.KubeDNSConfig{
-			// 	// NodeLocalDNS: &kopsapi.NodeLocalDNSConfig{},
-			// },
-			//    Provider: "CoreDNS",
-			//    N
-			// },
+			KubeDNS: &kopsapi.KubeDNSConfig{
+				NodeLocalDNS: &kopsapi.NodeLocalDNSConfig{},
+			},
 		},
 	}
 }
 
-func Test_Forward_To_KubeDNS(t *testing.T) {
-		c := buildKubeDNSCluster()
-		// c.Spec.KubeDNS.enabled = true.ContainerRuntime = "containerd"
-		// c.Spec.KubeDNS.NodeLocalDNS.Enabled = fi.Bool(true)
-		// c.Spec.KubeDNS.NodeLocalDNS.Enabled = fi.Bool(true)
-		b := assets.NewAssetBuilder(c, "")
+func Test_ForwardToKubeDNS_Is_False_When_NodeLocalDNS_Is_Enabled(t *testing.T) {
+	c := buildKubeDNSCluster()
+	c.Spec.KubeDNS.NodeLocalDNS.Enabled = fi.Bool(true)
 
-		ob := &KubeDnsOptionsBuilder{
-			&OptionsContext{
-				AssetBuilder: b,
-			},
-		}
+	b := assets.NewAssetBuilder(c, "")
 
-		err := ob.BuildOptions(&c.Spec)
-		if err != nil {
-			t.Fatalf("some meaningful error message here: %v", err)
-		}
+	ob := &KubeDnsOptionsBuilder{
+		&OptionsContext{
+			AssetBuilder: b,
+		},
+	}
 
-		if !*c.Spec.KubeDNS.NodeLocalDNS.Enabled && c.Spec.KubeDNS.NodeLocalDNS.ForwardToKubeDNS != nil {
-		  t.Fatalf("Node local not enabled but forwardToKubeDNS is set to %s", strconv.FormatBool(*c.Spec.KubeDNS.NodeLocalDNS.ForwardToKubeDNS))
-		}
-		// t.Fatalf("Forward to KubeDNS?: %s", strconv.FormatBool(*c.Spec.KubeDNS.NodeLocalDNS.Enabled)) //NodeLocalDNS.ForwardToKubeDNS))
+	err := ob.BuildOptions(&c.Spec)
+	if err != nil {
+		t.Fatalf("Error while building KubeDNS options: %v", err)
+	}
 
-		// t.Fatalf("Node local not enabled: %s", strconv.FormatBool(*c.Spec.KubeDNS.NodeLocalDNS.Enabled))
+	if !fi.BoolValue(c.Spec.KubeDNS.NodeLocalDNS.Enabled) {
+		t.Fatalf("NodeLocalDNS is not enabled.")
+	}
 
-		//t.Fatalf("Forward to KubeDNS?: %s", strconv.FormatBool(*c.Spec.KubeDNS.NodeLocalDNS.ForwardToKubeDNS))
-		//t.Fatalf("Node local not enabled: %s", strconv.FormatBool(*c.Spec.KubeDNS.NodeLocalDNS.Enabled))
-		// version, err := util.ParseKubernetesVersion(v)
-		// if err != nil {
-		// 	t.Fatalf("unexpected error from ParseKubernetesVersion %s: %v", v, err)
-		// }
+	if fi.BoolValue(c.Spec.KubeDNS.NodeLocalDNS.ForwardToKubeDNS) {
+		t.Fatalf("ForwardToKubeDNS is enabled.")
+	}
 
-		// ob := &ContainerdOptionsBuilder{
-		// 	&OptionsContext{
-		// 		AssetBuilder:      b,
-		// 		KubernetesVersion: *version,
-		// 	},
-		// }
-
-		// err = ob.BuildOptions(&c.Spec)
-		// if err != nil {
-		// 	t.Fatalf("unexpected error from BuildOptions: %v", err)
-		// }
-
-		// if c.Spec.Containerd.SkipInstall == true {
-		// 	t.Fatalf("expecting install when Kubernetes version >= 1.11: %s", v)
-		// }
 }
 
-// func Test_Build_Containerd_Unneeded_Runtime(t *testing.T) {
-// 	dockerVersions := []string{"1.13.1", "17.03.2", "18.06.3"}
+func Test_ForwardToKubeDNS_Is_Nil_When_NodeLocalDNS_Is_Disabled(t *testing.T) {
+	c := buildKubeDNSCluster()
 
-// 	for _, v := range dockerVersions {
+	b := assets.NewAssetBuilder(c, "")
 
-// 		c := buildContainerdCluster("1.11.0")
-// 		c.Spec.ContainerRuntime = "docker"
-// 		c.Spec.Docker = &kopsapi.DockerConfig{
-// 			Version: &v,
-// 		}
-// 		b := assets.NewAssetBuilder(c, "")
+	ob := &KubeDnsOptionsBuilder{
+		&OptionsContext{
+			AssetBuilder: b,
+		},
+	}
 
-// 		ob := &ContainerdOptionsBuilder{
-// 			&OptionsContext{
-// 				AssetBuilder: b,
-// 			},
-// 		}
+	err := ob.BuildOptions(&c.Spec)
+	if err != nil {
+		t.Fatalf("Error while building KubeDNS options: %v", err)
+	}
 
-// 		err := ob.BuildOptions(&c.Spec)
-// 		if err != nil {
-// 			t.Fatalf("unexpected error from BuildOptions: %v", err)
-// 		}
+	if fi.BoolValue(c.Spec.KubeDNS.NodeLocalDNS.Enabled) {
+		t.Fatalf("NodeLocalDNS is enabled.")
+	}
 
-// 		if c.Spec.Containerd.SkipInstall != true {
-// 			t.Fatalf("unexpected install when Docker version < 19.09: %s", v)
-// 		}
-// 	}
-// }
-
-// func Test_Build_Containerd_Needed_Runtime(t *testing.T) {
-// 	dockerVersions := []string{"18.09.3", "18.09.9", "19.03.4"}
-
-// 	for _, v := range dockerVersions {
-
-// 		c := buildContainerdCluster("1.11.0")
-// 		c.Spec.ContainerRuntime = "docker"
-// 		c.Spec.Docker = &kopsapi.DockerConfig{
-// 			Version: &v,
-// 		}
-// 		b := assets.NewAssetBuilder(c, "")
-
-// 		ob := &ContainerdOptionsBuilder{
-// 			&OptionsContext{
-// 				AssetBuilder: b,
-// 			},
-// 		}
-
-// 		err := ob.BuildOptions(&c.Spec)
-// 		if err != nil {
-// 			t.Fatalf("unexpected error from BuildOptions: %v", err)
-// 		}
-
-// 		if c.Spec.Containerd.SkipInstall == true {
-// 			t.Fatalf("expected install when Docker version >= 19.09: %s", v)
-// 		}
-// 	}
-// }
+	if c.Spec.KubeDNS.NodeLocalDNS.ForwardToKubeDNS != nil {
+		t.Fatalf("ForwardToKubeDNS is set to %s", strconv.FormatBool(fi.BoolValue(c.Spec.KubeDNS.NodeLocalDNS.ForwardToKubeDNS)))
+	}
+}

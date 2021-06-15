@@ -150,6 +150,16 @@ type InstanceGroupSpec struct {
 	UpdatePolicy *string `json:"updatePolicy,omitempty"`
 	// WarmPool configures an ASG warm pool for the instance group
 	WarmPool *WarmPoolSpec `json:"warmPool,omitempty"`
+	// Openstack specifies specific configuration for instances in Openstack
+	Openstack *OpenstackSpec `json:"openstack,omitempty"`
+}
+
+// OpenstackSpec defines Openstack specific configuration
+type OpenstackSpec struct {
+	// AllowedAddressPairs defines additional addresses which are allowed on a port of an instance
+	AllowedAddressPairs []string `json:"allowedAddressPairs,omitempty"`
+	// UseConfigDrive specifies to use a config drive instead of contacting Metadata server for the userdata
+	UseConfigDrive *bool `json:"useConfigDrive,omitempty"`
 }
 
 // InstanceMetadataOptions defines the EC2 instance metadata service options (AWS Only)

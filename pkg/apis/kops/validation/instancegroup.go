@@ -141,6 +141,8 @@ func ValidateInstanceGroup(g *kops.InstanceGroup, cloud fi.Cloud) field.ErrorLis
 		allErrs = append(allErrs, validateExternalLoadBalancer(&lb, path)...)
 	}
 
+	// TODO(sprietl): add validation for allowedaddresspairs and useconfigdrive here
+
 	allErrs = append(allErrs, IsValidValue(field.NewPath("spec", "updatePolicy"), g.Spec.UpdatePolicy, []string{kops.UpdatePolicyAutomatic, kops.UpdatePolicyExternal})...)
 
 	return allErrs

@@ -37,6 +37,7 @@ type Port struct {
 	AdditionalSecurityGroups []string
 	Lifecycle                fi.Lifecycle
 	Tag                      *string
+	// AllowedAddressPairs      []string
 }
 
 // GetDependencies returns the dependencies of the Port task

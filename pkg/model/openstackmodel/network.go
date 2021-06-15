@@ -47,7 +47,7 @@ func (b *NetworkModelBuilder) Build(c *fi.ModelBuilderContext) error {
 			Tag:       s(clusterName),
 			Lifecycle: b.Lifecycle,
 		}
-		if osSpec.Network != nil {
+		if osSpec.Network != nil && osSpec.Network.AvailabilityZoneHints != nil {
 			t.AvailabilityZoneHints = osSpec.Network.AvailabilityZoneHints
 		}
 		c.AddTask(t)

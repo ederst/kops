@@ -53,6 +53,7 @@ type Instance struct {
 
 	Lifecycle    fi.Lifecycle
 	ForAPIServer bool
+	UseConfigDrive bool
 }
 
 var _ fi.Task = &Instance{}
@@ -165,6 +166,7 @@ func (e *Instance) Find(c *fi.Context) (*Instance, error) {
 		Role:             fi.String(server.Metadata["KopsRole"]),
 		AvailabilityZone: e.AvailabilityZone,
 		GroupName:        e.GroupName,
+		UseConfigDrive:   e.UseConfigDrive,
 	}
 
 	ports, err := cloud.ListPorts(ports.ListOpts{
@@ -305,6 +307,7 @@ func (_ *Instance) RenderOpenstack(t *openstack.OpenstackAPITarget, a, e, change
 			},
 			Metadata:       e.Metadata,
 			SecurityGroups: e.SecurityGroups,
+			ConfigDrive:    fi.Bool(e.UseConfigDrive),
 		}
 		if e.UserData != nil {
 			bytes, err := fi.ResourceAsBytes(e.UserData)

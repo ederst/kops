@@ -759,6 +759,12 @@ type OpenstackRouter struct {
 // OpenstackNetwork defines the config for a network
 type OpenstackNetwork struct {
 	AvailabilityZoneHints []*string `json:"availabilityZoneHints,omitempty"`
+	AllowedAddressPairs   []*string `json:"allowedAddressPairs,omitempty"`
+}
+
+// OpenstackCompute defines the config for the compute part of Openstack
+type OpenstackCompute struct {
+	UseConfigDrive *bool `json:"useConfigDrive,omitempty"`
 }
 
 // OpenstackConfiguration defines cloud config elements for the openstack cloud provider
@@ -769,6 +775,7 @@ type OpenstackConfiguration struct {
 	BlockStorage       *OpenstackBlockStorageConfig `json:"blockStorage,omitempty"`
 	InsecureSkipVerify *bool                        `json:"insecureSkipVerify,omitempty"`
 	Network            *OpenstackNetwork            `json:"network,omitempty"`
+	Compute            *OpenstackCompute            `json:"compute,omitempty"`
 }
 
 // AzureConfiguration defines Azure specific cluster configuration.

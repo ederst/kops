@@ -184,6 +184,8 @@ type InstanceGroupSpec struct {
 	UpdatePolicy *string `json:"updatePolicy,omitempty"`
 	// WarmPool specifies a pool of pre-warmed instances for later use (AWS only).
 	WarmPool *WarmPoolSpec `json:"warmPool,omitempty"`
+	// OpenstackOptions
+	OpenstackOptions *OpenstackOptions `json:"openstackOptions,omitempty"`
 }
 
 const (
@@ -197,6 +199,11 @@ const (
 
 // SpotAllocationStrategies is a collection of supported strategies
 var SpotAllocationStrategies = []string{SpotAllocationStrategyLowestPrices, SpotAllocationStrategyDiversified, SpotAllocationStrategyCapacityOptimized}
+
+type OpenstackOptions struct {
+	AllowedAddressPairs []string `json:"allowedAddressPairs,omitempty"`
+	UseConfigDrive *bool `json:"useConfigDrive,omitempty"`
+}
 
 // InstanceMetadataOptions defines the EC2 instance metadata service options (AWS Only)
 type InstanceMetadataOptions struct {

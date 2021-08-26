@@ -25,10 +25,7 @@ jobs:
       - name: make all examples test
         working-directory: ${{ env.GOPATH }}/src/k8s.io/kops
         run: |
-          mkdir -p ${{ env.GOPATH }}/src/k8s.io/kops/.build/local
-          echo "linux bin" > ${{ env.GOPATH }}/src/k8s.io/kops/.build/local/kops
-
-#          make all examples test
+          make all examples test
 
       - name: upload linux binary
         if: startsWith(github.ref, 'refs/tags/')
@@ -117,12 +114,9 @@ jobs:
     steps:
       - name: Download all kops binary artifacts
         uses: actions/download-artifact@v2
-        # with:
-        #  name: kops-linux-amd64
-        #  path: kops-linux-amd64
 
-      - name: Display structure
-        run: ls -R
+      # - name: Display structure
+      #   run: ls -R
 
       - name: renamve kops binary artifacts
         run: |
@@ -140,7 +134,6 @@ jobs:
       #     name: kops-win
       #     path: kops-win
 
-      # ${{ secrets.GITHUB_TOKEN }}?
       - name: Release
         uses: softprops/action-gh-release@v1
         with:

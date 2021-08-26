@@ -22,10 +22,16 @@ jobs:
         with:
           path: ${{ env.GOPATH }}/src/k8s.io/kops
 
+      - name: Display structure
+        run: ls -R
+
       - name: make all examples test
         working-directory: ${{ env.GOPATH }}/src/k8s.io/kops
         run: |
           make all examples test
+
+      - name: Display structure of downloaded files
+        run: ls -R
 
       - name: upload linux binary
         if: startsWith(github.ref, 'refs/tags/')
@@ -35,47 +41,47 @@ jobs:
           path: ./build/local/kops
           if-no-files-found: error
 
-  build-macos-amd64:
-    runs-on: macos-10.15
-    steps:
-    - name: Set up go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.16.7
+  # build-macos-amd64:
+  #   runs-on: macos-10.15
+  #   steps:
+  #   - name: Set up go
+  #     uses: actions/setup-go@v2
+  #     with:
+  #       go-version: 1.16.7
 
-    - uses: actions/checkout@v2
-      with:
-        path: ${{ env.GOPATH }}/src/k8s.io/kops
+  #   - uses: actions/checkout@v2
+  #     with:
+  #       path: ${{ env.GOPATH }}/src/k8s.io/kops
 
-    - name: make kops examples test
-      working-directory: ${{ env.GOPATH }}/src/k8s.io/kops
-      run: |
-        make kops examples test
+  #   - name: make kops examples test
+  #     working-directory: ${{ env.GOPATH }}/src/k8s.io/kops
+  #     run: |
+  #       make kops examples test
 
-    - name: upload macos binary
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: actions/upload-artifact@v2
-      with:
-        name: kops-macos
-        path: ./build/local/kops
-        if-no-files-found: error
+  #   - name: upload macos binary
+  #     if: startsWith(github.ref, 'refs/tags/')
+  #     uses: actions/upload-artifact@v2
+  #     with:
+  #       name: kops-macos
+  #       path: ./build/local/kops
+  #       if-no-files-found: error
 
-  build-windows-amd64:
-    runs-on: windows-2019
-    steps:
-    - name: Set up go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.16.7
+  # build-windows-amd64:
+  #   runs-on: windows-2019
+  #   steps:
+  #   - name: Set up go
+  #     uses: actions/setup-go@v2
+  #     with:
+  #       go-version: 1.16.7
 
-    - uses: actions/checkout@v2
-      with:
-        path: ${{ env.GOPATH }}/src/k8s.io/kops
+  #   - uses: actions/checkout@v2
+  #     with:
+  #       path: ${{ env.GOPATH }}/src/k8s.io/kops
 
-    - name: make kops examples test
-      working-directory: ${{ env.GOPATH }}/src/k8s.io/kops
-      run: |
-        make kops examples test-windows
+  #   - name: make kops examples test
+  #     working-directory: ${{ env.GOPATH }}/src/k8s.io/kops
+  #     run: |
+  #       make kops examples test-windows
 
     # - name: upload win binary
     #   if: startsWith(github.ref, 'refs/tags/')
@@ -85,29 +91,29 @@ jobs:
     #     path: ./build/local/kops
     #     if-no-files-found: error
 
-  verify:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Set up go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.16.7
+  # verify:
+    # runs-on: ubuntu-20.04
+    # steps:
+    #   - name: Set up go
+    #     uses: actions/setup-go@v2
+    #     with:
+    #       go-version: 1.16.7
 
-      - uses: actions/checkout@v2
-        with:
-          path: ${{ env.GOPATH }}/src/k8s.io/kops
+    #   - uses: actions/checkout@v2
+    #     with:
+    #       path: ${{ env.GOPATH }}/src/k8s.io/kops
 
-      - name: make quick-ci
-        working-directory: ${{ env.GOPATH }}/src/k8s.io/kops
-        run: |
-          make quick-ci
+    #   - name: make quick-ci
+    #     working-directory: ${{ env.GOPATH }}/src/k8s.io/kops
+    #     run: |
+    #       make quick-ci
 
   release:
     runs-on: ubuntu-20.04
     if: startsWith(github.ref, 'refs/tags/')
     needs:
       - build-linux-amd64
-      - build-macos-amd64
+      # - build-macos-amd64
       # - build-windows-amd64
       # - verify
     steps:
@@ -117,17 +123,20 @@ jobs:
           name: kops-linux
           path: kops-linux
 
-      - name: Download kops macos binary
-        uses: actions/download-artifact@v2
-        with:
-          name: kops-macos
-          path: kops-macos
+      - name: Display structure
+        run: ls -R
 
-      - name: Download kops windows binary
-        uses: actions/download-artifact@v2
-        with:
-          name: kops-win
-          path: kops-win
+      # - name: Download kops macos binary
+      #   uses: actions/download-artifact@v2
+      #   with:
+      #     name: kops-macos
+      #     path: kops-macos
+
+      # - name: Download kops windows binary
+      #   uses: actions/download-artifact@v2
+      #   with:
+      #     name: kops-win
+      #     path: kops-win
 
       # ${{ secrets.GITHUB_TOKEN }}?
       - name: Release

@@ -22,23 +22,17 @@ jobs:
         with:
           path: ${{ env.GOPATH }}/src/k8s.io/kops
 
-      - name: Display structure
-        run: ls -R
-
       - name: make all examples test
         working-directory: ${{ env.GOPATH }}/src/k8s.io/kops
         run: |
           make all examples test
-
-      - name: Display structure of downloaded files
-        run: ls -R
 
       - name: upload linux binary
         if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v2
         with:
           name: kops-linux
-          path: ./build/local/kops
+          path: ./go/src/k8s.io/kops/.build/local/kops
           if-no-files-found: error
 
   # build-macos-amd64:
@@ -144,5 +138,6 @@ jobs:
         with:
           files: |
             kops-linux
-            kops-macos
-            kops-win
+
+          # kops-macos
+          # kops-win

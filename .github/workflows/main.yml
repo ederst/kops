@@ -25,7 +25,10 @@ jobs:
       - name: make all examples test
         working-directory: ${{ env.GOPATH }}/src/k8s.io/kops
         run: |
-          make all examples test
+          mkdir -p ${{ env.GOPATH }}/src/k8s.io/kops/.build/local
+          echo "linux bin" > ${{ env.GOPATH }}/src/k8s.io/kops/.build/local/kops
+
+#          make all examples test
 
       - name: upload linux binary
         if: startsWith(github.ref, 'refs/tags/')
@@ -34,6 +37,7 @@ jobs:
           name: kops-linux-amd64
           path: ${{ env.GOPATH }}/src/k8s.io/kops/.build/local/kops
           if-no-files-found: error
+          retention-days: 1
 
   # build-macos-amd64:
   #   runs-on: macos-10.15
@@ -117,13 +121,12 @@ jobs:
         #  name: kops-linux-amd64
         #  path: kops-linux-amd64
 
-      - name: renamve kops binary artifacts
-        working-directory: ${{ env.GOPATH }}/src/k8s.io/kops
-        run: |
-          mv kops-linux-amd64/kops kops-linux-amd64/kops-linux-amd64
-
       - name: Display structure
         run: ls -R
+
+      - name: renamve kops binary artifacts
+        run: |
+          mv kops-linux-amd64/kops kops-linux-amd64/kops-linux-amd64
 
       # - name: Download kops macos binary
       #   uses: actions/download-artifact@v2

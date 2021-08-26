@@ -105,6 +105,11 @@ jobs:
   release:
     runs-on: ubuntu-20.04
     if: startsWith(github.ref, 'refs/tags/')
+    needs:
+      - build-linux-amd64
+      - build-macos-amd64
+      - build-windows-amd64
+      - verify
     steps:
       - name: Download kops linux binary
         uses: actions/download-artifact@v2

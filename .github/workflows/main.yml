@@ -31,13 +31,12 @@ jobs:
       - uses: actions/checkout@v2
         with:
           path: ${{ env.GOPATH }}/src/k8s.io/kops
+          fetch-depth: 0
 
       - name: git describe variants
         working-directory: ${{ env.GOPATH }}/src/k8s.io/kops
         run: |
-          git describe --debug
           git describe --debug --always
-          git describe --debug --always --all
 
   #     - name: make all examples test
   #       working-directory: ${{ env.GOPATH }}/src/k8s.io/kops

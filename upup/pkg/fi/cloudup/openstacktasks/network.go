@@ -23,6 +23,7 @@ import (
 	"k8s.io/klog/v2"
 	"k8s.io/kops/upup/pkg/fi"
 	"k8s.io/kops/upup/pkg/fi/cloudup/openstack"
+	"k8s.io/kops/upup/pkg/fi/cloudup/terraform"
 )
 
 // +kops:fitask
@@ -146,4 +147,22 @@ func (_ *Network) RenderOpenstack(t *openstack.OpenstackAPITarget, a, e, changes
 	e.ID = a.ID
 	klog.V(2).Infof("Using an existing Openstack network, id=%s", fi.StringValue(e.ID))
 	return nil
+}
+
+type terraformNetwork struct {
+	Name *string `json:"name,omitempty" cty:"name"`
+}
+
+func (_ *Network) RenderTerraform(t *terraform.TerraformTarget, a, e, changes *Network) error {
+	tf := &terraformNetwork{
+		// ID: e.TerraformLink(),
+		Name: e.Name,
+	}
+
+	return t.RenderResource("openstack_networking_network_v2", *e.Name, tf)
+}
+
+// TerraformLink fills in the property
+func (e *Network) TerraformLink() *terraform.Literal {
+	return terraform.LiteralProperty("openstack_networking_network_v2", fi.StringValue(e.Name), "id")
 }
